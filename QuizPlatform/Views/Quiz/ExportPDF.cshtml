@@ -1,0 +1,80 @@
+﻿@model Tuple<List<Question>, clsQuiz>
+
+@{
+    ViewData["Title"] = "ExportPDF";
+    Layout = "~/Views/Shared/_LayoutHome.cshtml";
+}
+
+<div class="container-fuild mx-4 pe-3 question-exam-mode" >
+    <div class="row">
+        
+    </div>
+    <div class="row mb-3">
+        <div class="col-sm-3 d-flex justify-content-between align-items-center">
+            <label for="Password" class="col-form-label">Password</label>
+            <i class="fa-solid required fa-circle-exclamation text-end"></i>
+        </div>
+        <div class="col-sm-7">
+            <input type="text" class="form-control" name="Password">
+        </div>
+        <div class="col-sm-2">
+            <button class="btn btn-style-1 btn-primary btn-red" id="btnExport">
+                Print PDF
+            </button>
+        </div>
+    </div>
+
+    <div class="row" id="exportPDF">
+        <div class="col-12">
+            <div class="container lst-question">
+
+                @if (Model.Item2.lstIDQuestion != null && Model.Item2.lstIDQuestion.Count > 0)
+                {
+                    int idQ = 1;
+                    @foreach (var item in Model.Item2.lstIDQuestion)
+                    {
+                        Question itemQ = Model.Item1.Find(obj => obj.ID == item);
+
+                        <div class="row question-item d-flex justify-content-between" id="@itemQ.ID">
+                            
+                            <div class="col-12 question-item-content">
+                                <p>Câu @idQ: @Html.Raw(@itemQ.Content)</p>
+
+
+                                <fieldset class="row mb-3 ps-3">
+                                    <div class="col-sm-12">
+                                        @foreach (Answer ans in itemQ.Answers)
+                                        {
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="gridRadios"
+                                                       id="gridRadios1" value="option1" checked>
+                                                <label class="form-check-label" for="gridRadios1">
+                                                    @ans.choice
+                                                </label>
+                                            </div>
+                                        }
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        idQ++;
+                    }
+
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const button = document.getElementById('btnExport');
+
+    function generatePDF() {
+        // Choose the element that your content will be rendered to.
+        const element = document.getElementById('exportPDF');
+        // Choose the element and save the PDF for your user.
+        html2pdf().from(element).save();
+    }
+
+    button.addEventListener('click', generatePDF);
+</script>

@@ -1,0 +1,186 @@
+﻿@model Tuple<List<Question>, clsQuiz>
+
+@{
+    ViewData["Title"] = "Result";
+    Layout = "~/Views/Shared/_LayoutHome.cshtml";
+}
+
+@{
+    float epsilon = 0.0001f;
+}
+<div class="container-fuild mx-4 pe-3 question-exam-mode">
+    <div class="row">
+        <div class="col-9 mb-5">
+            <div class="container lst-question">
+
+                <div class="result">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th scope="row" class="col-2">Started on</th>
+                                <td class="col-10">Tuesday, 21 March 2023, 8:33 PM</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">State</th>
+                                <td>Finished</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Completed on</th>
+                                <td colspan="2" id="timeCompleted">Tuesday, 21 March 2023, 8:33 PM</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Time taken </th>
+                                <td colspan="2">1 min 27 secs</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Marks</th>
+                                <td colspan="2">0.00/67.00</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Grade</th>
+                                <td colspan="2">0.00 out of 10.00 (0%)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <div class="row d-flex justify-content-end">
+                    <p class="clock" id="timer">0</p>
+                </div>
+
+                @if (Model.Item2.lstIDQuestion != null && Model.Item2.lstIDQuestion.Count > 0)
+                {
+                    bool shuffle = Model.Item2.Shuffle;
+                    int idQ = 1;
+                    @foreach (var item in Model.Item2.lstIDQuestion)
+                    {
+                        Question itemQ = Model.Item1.Find(obj => obj.ID == item);
+
+                        <div class="row question-item d-flex justify-content-between" id="@itemQ.ID">
+                            <div class="col-2">
+                                <div class="question-item-info">
+                                    <p class="txt-red">Question <span class="hightlight">@idQ</span></p>
+                                    <p>Not yet answered</p>
+                                    <p>Marked out of @itemQ.DefaultMark</p>
+                                    <p><i class="fa-solid fa-flag"></i> Flag question</p>
+                                </div>
+                            </div>
+                            <div class="col-10 question-item-content">
+                                <p>@Html.Raw(@itemQ.Content)</p>
+
+                                <fieldset class="row mb-3 ps-3">
+                                    <div class="col-sm-12">
+                                        @{
+                                            bool multiChoice = false;
+                                            int idChoices = 1;
+                                            var shuffledAnswers = itemQ.Answers;
+                                            if (shuffle)
+                                                shuffledAnswers = itemQ.Answers.OrderBy(_ => new Random().Next()).ToList();
+
+                                            int tmpCountChoice = 0;
+                                            foreach (Answer ans in itemQ.Answers)
+                                            {
+                                                if (ans.weight == 0 || ans.weight == 2)
+                                                    tmpCountChoice++;
+                                            }
+                                            if (tmpCountChoice > 1)
+                                                multiChoice = true;
+
+                                            if (!multiChoice)
+                                            {
+                                                @foreach (Answer ans in shuffledAnswers)
+                                                {
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="Q-@idQ-A-@idChoices">
+                                                        <label class="form-check-label" for="Q-@idQ-A-@idChoices">
+                                                            @Html.Raw(@ans.choice)
+                                                        </label>
+                                                    </div>
+                                                idChoices++;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                @foreach (Answer ans in shuffledAnswers)
+                                                {
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="Q-@idQ-A-@idChoices">
+                                                        <label class="form-check-label" for="Q-@idQ-A-@idChoices">
+                                                            @Html.Raw(@ans.choice)
+                                                        </label>
+                                                    </div>
+                                                    idChoices++;
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="col-10 offset-sm-2 show-ans">
+                                <p class="pt-2 ps-2">
+                                    The correct answer is:
+                                    @foreach (Answer ans in shuffledAnswers)
+                                    {
+                                        @if (ans.weight != 0 && ans.weight != 2)
+                                        {
+                                            @Html.Raw(@ans.choice) <span>  </span>
+                                        }
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        idQ++;
+                    }
+
+                }
+            </div>
+        </div>
+        <div class="col-3 right-nav">
+            <div class="nav-title">
+                <p>Quiz navigation</p>
+            </div>
+            <div class="nav-content">
+                <div class="container">
+                    <div class="row lst-shortcut d-flex">
+                        @if (Model.Item2.lstIDQuestion != null && Model.Item2.lstIDQuestion.Count > 0)
+                        {
+                            int idQ = 1;
+                            @foreach (var item in Model.Item2.lstIDQuestion)
+                            {
+                                <div class="shortcut-item">
+                                    <a href="#@item">
+                                        <div class="shortcut-num">
+                                            <p>@idQ</p>
+                                            <div class="doing"></div>
+                                        </div>
+                                    </a>
+                                </div>
+                                idQ++;
+                            }
+
+                        }
+                    </div>
+                </div>
+
+                <a href="~/Home/">Finish review</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const date = new Date();
+    const options = {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true
+    };
+    const formattedDate = date.toLocaleString('en-US', options);
+    $('#timeCompleted').val(formattedDate);
+    console.log(formattedDate); // "Tuesday, 21 March 2023, 8:33 PM"
+</script>

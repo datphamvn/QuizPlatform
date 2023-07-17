@@ -1,0 +1,29 @@
+﻿@model List<QuizPlatform.Models.clsQuiz>
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<div class="container-fuild mx-4 px-4 section-type1 list-exam">
+    <div class="row py-4">
+        <div class="col-12">
+
+            @foreach(var item in Model)
+            {
+                <div class="item-exam d-flex align-items-center">
+                    <img src="https://lms.hust.edu.vn/theme/image.php/mb2nl/quiz/1673341147/icon" class="img-fluid"
+                         alt="">
+                    <a href="~/Quiz/?idQuiz=@item.ID"><h2>@item.Name</h2></a>
+                </div>
+            }
+
+            
+            <div class="item-exam d-flex align-items-center disabled">
+                <img src="https://lms.hust.edu.vn/theme/image.php/mb2nl/quiz/1673341147/icon" class="img-fluid"
+                     alt="">
+                <h2>Kiểm tra cuối kỳ môn ITxxxx</h2>
+            </div>
+        </div>
+    </div>
+</div>

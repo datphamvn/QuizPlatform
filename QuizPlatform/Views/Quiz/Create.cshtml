@@ -1,0 +1,230 @@
+﻿
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_LayoutHome.cshtml";
+}
+
+<div class="container-fuild mx-4 px-4 section-type1">
+    <div class="d-flex align-items-center title-section">
+        <img src="https://lms.hust.edu.vn/theme/image.php/mb2nl/quiz/1673341147/icon" class="img-fluid" alt="">
+        <h2>Adding a new Quiz</h2>
+        <i class="info fa-sharp fa-solid fa-circle-question"></i>
+    </div>
+
+    <div class="subsection ms-4">
+                <div class="title-subsection pb-3">
+                    <i class="fa-solid fa-caret-down"></i> <span>General</span>
+                </div>
+                <div class="content-subsection">
+                    <form action="~/Quiz/SaveQuiz" method="POST">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center">
+                                <label for="Name" class="col-form-label">Name</label>
+                                <i class="fa-solid required fa-circle-exclamation text-end"></i>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" name="Name" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center">
+                                <label for="Description" class="col-form-label">Description</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <textarea class="form-control" name="Description" rows="8"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mb-3 offset-sm-4">
+                            <div class="col-sm-10">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="gridCheck1">
+                                    <label class="form-check-label" for="gridCheck1">
+                                        Display description on course page <i class="info fa-sharp fa-solid fa-circle-question"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center">
+                                <label for="inputPassword3" class="col-form-label">Open the quiz</label>
+                                <i class="info fa-sharp fa-solid fa-circle-question"></i>
+                            </div>
+
+                    <div id="timeOpenQuiz" class="col-sm-6">
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control" value="21" disabled="">
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control" value="March" disabled="">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control" value="2023" disabled="">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control" value="15" disabled="">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control" value="57" disabled="">
+                                    </div>
+                                </div>
+                            </div>
+                    
+                            <div class="col-sm-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enableOpenTime">
+                                    <label class="form-check-label" for="enableOpenTime">
+                                        Enable
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center">
+                                <label for="inputPassword3" class="col-form-label">Close the quiz</label>
+                                <i class="info fa-sharp fa-solid fa-circle-question"></i>
+                            </div>
+
+                            <div id="timeCloseQuiz" class="col-sm-6">
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control" value="21" disabled="">
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control" value="March" disabled="">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control" value="2023" disabled="">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control" value="15" disabled="">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control" value="57" disabled="">
+                                    </div>
+                                </div>
+                            </div>
+                           
+
+                            <div class="col-sm-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enableCloseTime">
+                                    <label class="form-check-label" for="enableCloseTime">
+                                        Enable
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center">
+                                <label for="timeLimit" class="col-form-label">Time limit</label>
+                                <i class="info fa-sharp fa-solid fa-circle-question"></i>
+                            </div>
+
+                            <div id="timeLimit" class="col-sm-6">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <input type="number" class="form-control" name="timeLimit" id="numTimeLimit">
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <select class="form-select" name="unitTimeLimit" id="unitTimeLimit" aria-label="Default select example">
+                                            <option value="minutes" selected>Minutes</option>
+                                            <option value="seconds">Seconds</option>
+                                            <option value="hours">Hours</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enableTimeLimit">
+                                    <label class="form-check-label" for="enableTimeLimit">
+                                        Enable
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center">
+                                <label for="timeExpires" class="col-form-label">When time expires</label>
+                                <i class="info fa-sharp fa-solid fa-circle-question"></i>
+                            </div>
+                            <div class="col-sm-4">
+                                <select class="form-select" aria-label="Default select example">
+                                    <option selected>Open attempts are submitted automatically</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row py-2">
+                            <div class="col offset-sm-4">
+                                <button id="creatQuiz" class="btn btn-style-1 btn-primary btn-red">
+                                    Create
+                                </button>
+                                <a href="~/Home/" class="btn btn-style-1 btn-primary">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+</div>
+
+<script>
+    function handleSubmitForm() {
+        var allFilled = true;
+        $("form :input[required]").each(function () {
+            if ($(this).val() == "") {
+                allFilled = false;
+            }
+        });
+
+        if (allFilled) {
+            $('form').submit();
+        } else {
+            alert("Please fill in all required fields");
+        }
+    }
+
+    $('#creatQuiz').click(function (e) {
+        e.preventDefault();
+        handleSubmitForm();
+    });
+
+    $('#timeOpenQuiz input').prop('disabled', true);
+
+    // enable input fields when the checkbox is checked
+    $('#enableOpenTime').change(function () {
+        if ($(this).is(':checked')) {
+            $('#timeOpenQuiz input').prop('disabled', false);
+        } else {
+            $('#timeOpenQuiz input').prop('disabled', true);
+        }
+    });
+
+    $('#timeCloseQuiz input').prop('disabled', true);
+
+    $('#enableCloseTime').change(function () {
+        if ($(this).is(':checked')) {
+            $('#timeCloseQuiz input').prop('disabled', false);
+        } else {
+            $('#timeCloseQuiz input').prop('disabled', true);
+        }
+    });
+
+    $('#timeLimit input').prop('disabled', true);
+    $('#timeLimit select').prop('disabled', true);
+
+    $('#enableTimeLimit').change(function () {
+        if ($(this).is(':checked')) {
+            $('#timeLimit input').prop('disabled', false);
+            $('#timeLimit select').prop('disabled', false);
+        } else {
+            $('#timeLimit input').prop('disabled', true);
+            $('#timeLimit select').prop('disabled', true);
+        }
+    });
+    
+</script>

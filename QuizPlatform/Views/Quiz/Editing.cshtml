@@ -1,0 +1,605 @@
+﻿@using QuizPlatform.Utils;
+@model Tuple<List<Category>, List<Question>, clsQuiz>
+@{
+    ViewData["Title"] = "Editing";
+    Layout = "~/Views/Shared/_LayoutHome.cshtml";
+}
+
+@{
+    var categories = Model.Item1;
+
+    Func<IEnumerable<Category>, int?, IEnumerable<Category>> getChildren = null;
+    getChildren = (cats, parent) => cats.Where(c => c.ParentCategory == parent).Select(c =>
+    {
+        c.Children = getChildren(cats, c.ID).ToList();
+        return c;
+    });
+    var rootCategories = getChildren(categories, -1).ToList();
+}
+
+<div class="container-fuild mx-4 px-4 section-type1">
+    <div class="d-flex align-items-center title-section">
+        <h2>Editing Quiz: @Model.Item3.Name</h2>
+        <i class="info fa-sharp fa-solid fa-circle-question"></i>
+    </div>
+
+    <form action="~/Quiz/UpdateSettingsQuiz" method="POST" id="fUpdateSettingsQuiz">
+    <input type="hidden" name="ID" value="@Model.Item3.ID" />
+    <div class="row d-flex align-items-center">
+        <div class="col-6">
+            <p>Question: @Model.Item3.lstIDQuestion.Count | This quiz is open</p>
+        </div>
+        <div class="col-6">
+            <div class="row mb-3 d-flex justify-content-end">
+                    <label for="maxGrade" class="col-sm-4 col-form-label text-end">Maximum grade</label>
+                <div class="col-sm-2">
+                        <input type="number" class="form-control" name="maxGrade" value="10">
+                </div>
+                <div class="col-sm-2">
+                    <button id="btnSaveSettingsQuiz" type="submit" class="btn btn-style-1 btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row d-flex align-items-center">
+        <div class="col-6">
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-style-1 btn-primary">Repaginate</a>
+                    <a id="masterCheckbox2" class="btn btn-style-1 btn-primary">Select Multiple item</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 text-end">
+            <p class="my-0">Total of mark: <span id="total-mark">0.00</span></p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-6">
+            <i class="fa-solid fa-pencil"></i>
+        </div>
+        <div class="col-6 d-flex justify-content-end">
+            <div class="form-check">
+                @*<input type="hidden" id="vShuffle" name="Shuffle" />*@
+                <input class="form-check-input" type="checkbox" name="Shuffle" id="cbShuffle">
+                    <label class="form-check-label" for="cbShuffle">
+                Shuffle <i class="info fa-sharp fa-solid fa-circle-question"></i>
+                </label>
+            </div>
+        </div>
+    </div>
+    </form>
+    <div class="row">
+        <div class="col d-flex justify-content-end">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Add
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li>
+                        <a class="dropdown-item" href="~/Question/">
+                            <i class="fa-sharp fa-solid fa-plus"></i>A new question
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addQuizFormBank">
+                            <i class="fa-sharp fa-solid fa-plus"></i>From question bank
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addQuizRandom">
+                            <i class="fa-sharp fa-solid fa-plus"></i>a random question
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col" class="col-1">
+                        <input class="form-check-input" type="checkbox" id="masterCheckbox">
+                    </th>
+                    <th scope="col" class="col-9">
+                        <div class="group-col">
+                            <p>Question</p>
+                            <p class="sub">Question name / ID number</p>
+                        </div>
+                    </th>
+                    <th scope="col" class="col-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Item3.lstIDQuestion != null && Model.Item3.lstIDQuestion.Count > 0)
+                {
+                    @foreach (var item in Model.Item3.lstIDQuestion)
+                    {
+                        Question itemQ = Model.Item2.Find(obj => obj.ID == item);
+                        <tr class="lst-Main-Question">
+                            <th scope="row">
+                                <input class="form-check-input" type="checkbox" id="gridCheck1">
+                                <i class="fa-solid fa-list"></i>
+                            </th>
+                            <td>@Html.Raw(@itemQ.Content)</td>
+                            <td>
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="checkbox" class="bx-check-rm " id="add-trash-@itemQ.ID">
+                                <label for="add-trash-@itemQ.ID"><i class="fa-sharp fa-solid fa-trash tick-trash"></i></label>
+                                <input type="number" class="form-control df-mark col-3" value="@itemQ.DefaultMark">
+                                <a href="~/Question/Edit/?IDQuestion=@itemQ.ID"><i class="fa-solid fa-pen"></i></a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        <div class="col-auto mb-4">
+            <a id="rmAllCheckbox" class="btn btn-style-1 btn-primary">Delete all items checked</a>
+        </div>
+        
+    </div>
+
+</div>
+
+<!-- Bank Question Modal -->
+<div class="modal fade" id="addQuizFormBank" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Add a questions from bank</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-sm-2 col-form-label">Select a category</label>
+                    <div class="col-sm-3">
+                        <select class="form-select" id="tree-view">
+                            <option value="-1" selected>Default</option>
+                            @foreach (var category in rootCategories)
+                            {
+                                <option value="@category.ID">@category.Name (@Html.Raw(HtmlHelpers.CountQuestionsInCategory(Model.Item2, @category.ID)))</option>
+                                @Html.Raw(HtmlHelpers.RenderChildren(category.Children, Model.Item2, 1))
+                            }
+                        </select>
+                    </div>
+                </div>
+                <p>Search options</p>
+
+                <div class="row mb-3">
+                    <div class="col-sm-10">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showSubCatagory">
+                            <label class="form-check-label" for="showSubCatagory">
+                                Also show question for subcatagory
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-10">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="gridCheck1">
+                            <label class="form-check-label" for="gridCheck1">
+                                Also show old question
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <row class="lst-question">
+                    <form action="~/Quiz/UpdateQuesionOfQuiz" method="POST" id="fQuizFormBank">
+                        <input type="hidden" name="ID" value="@Model.Item3.ID" />
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="col-1">
+                                        <input class="form-check-input" type="checkbox"
+                                               id="masterCbQuestionFormBank">
+                                    </th>
+                                    <th scope="col" class="col-10">
+                                        <div class="group-col">
+                                            <p>Question</p>
+                                            <p class="sub">Question name / ID number</p>
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="col-1">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lst-BankQuestion">
+                                @{
+                                    int i = 0;
+                                }
+                                @foreach (Question item in Model.Item2)
+                                {
+
+                                    <tr class="@item.CategoryID itemQuestion">
+                                        <th scope="row">
+                                            <input type="hidden" name="lstIDQuestion[@i]" value="@item.ID">
+                                            <input class="form-check-input" type="checkbox" id="gridCheck1">
+                                            <i class="fa-solid fa-list"></i>
+                                        </th>
+                                        <td>@Html.Raw(@item.Content)</td>
+                                        <td><a href="~/Question/Edit/?IDQuestion=@item.ID">Edit <i class="fa-solid fa-caret-down"></i></a></td>
+                                    </tr>
+                                    i++;
+                                }
+                            </tbody>
+                        </table>
+
+                        <button class="btn btn-style-1 btn-primary" id="btnAddFromBank">ADD SELECTED QUESTIONS TO THE QUIZ</button>
+                    </form>
+                </row>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Random Question Modal -->
+<div class="modal fade" id="addQuizRandom" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Add a random questions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-sm-2 col-form-label">Select a category</label>
+                    <div class="col-sm-3">
+                        <select class="form-select" id="tree-view2">
+                            <option value="-1" selected>Default</option>
+                            @foreach (var category in rootCategories)
+                            {
+                                <option value="@category.ID">@category.Name (@Html.Raw(HtmlHelpers.CountQuestionsInCategory(Model.Item2, @category.ID)))</option>
+                                @Html.Raw(HtmlHelpers.RenderChildren(category.Children, Model.Item2, 1))
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-10">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showSubCatagory2">
+                            <label class="form-check-label" for="showSubCatagory2">
+                                Also show question for subcatagory
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-4 d-flex justify-content-between align-items-center">
+                        <label for="numberRandom" class="col-form-label">Number of random questions</label>
+                        <i class="fa-solid required fa-circle-exclamation text-end"></i>
+                    </div>
+                    <div class="col-sm-2">
+                        @*<input type="number" class="form-control" name="numberRandom" id="numberRandom">*@
+                        <select class="form-select" name="numberRandom" id="numberRandom">
+                            <option value="-1" selected>Default</option>
+                        </select>
+                    </div>
+                </div>
+
+                <row class="lst-question2">
+                    <form action="~/Quiz/UpdateQuesionOfQuiz" method="POST" id="fQuizRandom">
+                        <input type="hidden" name="ID" value="@Model.Item3.ID" />
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="col-1">
+                                        <input class="form-check-input" type="checkbox" id="masterCbRandom">
+                                    </th>
+                                    <th scope="col" class="col-10">
+                                        <div class="group-col">
+                                            <p>Question</p>
+                                            <p class="sub">Question name / ID number</p>
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="col-1">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lst-RandQuestions">
+                                @{
+                                    int i2 = 0;
+                                }
+                                @foreach (Question item in Model.Item2)
+                                {
+
+                                    <tr class="@item.CategoryID itemQuestion">
+                                        <th scope="row">
+                                            <input type="hidden" name="lstIDQuestion[@i2]" value="@item.ID">
+                                            <input class="form-check-input" type="checkbox" id="gridCheck1">
+                                            <i class="fa-solid fa-list"></i>
+                                        </th>
+                                        <td>@Html.Raw(@item.Content)</td>
+                                        <td><a href="~/Question/Edit/?IDQuestion=@item.ID">Edit <i class="fa-solid fa-caret-down"></i></a></td>
+                                    </tr>
+                                    i2++;
+                                }
+                            </tbody>
+                        </table>
+                        <button id="rdQues" class="btn btn-style-1 btn-primary">RANDOM QUESTIONS TO THE QUIZ</button>
+                    </form>
+                </row>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    //********* Main ***********//
+
+    // Cal total mark
+    var totalMark = 0;
+    $('tr.lst-Main-Question .df-mark').each(function () {
+        totalMark += parseInt($(this).val());
+    });
+    $('#total-mark').text(totalMark);
+
+    // Check or uncheck all question
+    $('#masterCheckbox').change(function () {
+        if (this.prop('checked') == true) {
+            $('tr.lst-Main-Question .form-check-input').prop('checked', true);
+        } else {
+            $('tr.lst-Main-Question .form-check-input').prop('checked', false);
+        }
+    });
+
+    //Select multibox button
+    $('#masterCheckbox2').click(function () {
+        if (!$('#masterCheckbox').checked) {
+            $('#masterCheckbox').prop('checked', true);
+            $('tr.lst-Main-Question .form-check-input').prop('checked', true);
+        }
+    });
+
+    // Save form
+    $('#btnSaveSettingsQuiz').click(function (e) {
+        e.preventDefault();
+
+        cbShuffle = $('#cbShuffle');
+        if (cbShuffle.prop('checked') == true)
+            cbShuffle.val("true");
+        else
+            cbShuffle.val("false");
+
+        $('#fUpdateSettingsQuiz').submit();
+    });
+
+    //Remove item checked in main view
+    $('#rmAllCheckbox').click(function (e) {
+        e.preventDefault();
+
+        $('tr.lst-Main-Question').each(function () {
+            var checkboxInput = $(this).find('.form-check-input');
+            if (checkboxInput.prop('checked') == true)
+                $(this).remove();
+        });
+    });
+
+    // Remove 1 item when click rm button
+    $('.bx-check-rm').change(function () {
+        $('tr.lst-Main-Question').each(function () {
+            if ($(this).find('.bx-check-rm').prop('checked') == true) {
+                $(this).remove();
+            }
+        });
+    });
+
+</script>
+
+
+<script>
+    //********* Random box ***********//
+
+    function findChildCategory(lstID) {
+        var findP = false;
+        var addChild = true;
+        var lstChild = [];
+        $('#tree-view2 option').each(function () {
+            if ($(this).attr('value') == lstID) {
+                findP = true;
+            }
+            else if (findP == true) {
+                rawText = $(this).html();
+                //console.log(rawText.includes("&nbsp;"));
+                if (rawText.includes("&nbsp;") && addChild)
+                    lstChild.push($(this).attr('value'));
+                else
+                    addChild = false
+            }
+        });
+        return lstChild;
+    }
+
+    $('.lst-question2').hide();
+    $('#tree-view2').change(function () {
+        $('.lst-question2').show();
+        // Get the selected value
+        var selectedValue = $(this).val();
+        var lstValue = [];
+
+        if ($('#showSubCatagory2').is(':checked'))
+            lstValue = findChildCategory(selectedValue);
+
+        lstValue.push(selectedValue);
+
+        // Show/hide table rows based on the selected value
+        $('tr.itemQuestion').each(function () {
+            if (lstValue.some(className => $(this).hasClass(className)) || selectedValue == "-1") {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        });
+    });
+
+    $('#showSubCatagory2').change(function () {
+        $('#tree-view2').val('-1');
+    });
+
+    /*
+    var arrayLength = $('#numberRandom').val();
+    $('tr.itemQuestion').hide();
+    var n = $('tr.itemQuestion').length - 1;
+    var randomArray = [];
+
+    for (var i = 0; i < arrayLength; i++) {
+        var randomNumber = Math.floor(Math.random() * (n + 1));
+        randomArray.push(randomNumber);
+    }
+
+    lst-RandQuestions
+
+    console.log(randomArray);
+    for (var i = 0; i < randomArray.length; i++) {
+        $('tr.itemQuestion')[randomArray[i]].show();
+    }*/
+
+    // Check or uncheck all question
+    $('#masterCbRandom').change(function () {
+        if (this.checked) {
+            $('tr.itemQuestion .form-check-input').prop('checked', true);
+        } else {
+            $('tr.itemQuestion .form-check-input').prop('checked', false);
+        }
+    });
+    
+
+    // Add number question for random get questions
+    function addOptions (n)
+    {
+        for (var i = 1; i <= n; i++) {
+            var option = $("<option>", {
+                value: i,
+                text: i
+            });
+            $("#numberRandom").append(option);
+        }
+    }
+
+    $("#addQuizRandom #tree-view2").on("change", function () {
+        $("#numberRandom option:not(:first-child)").remove();
+        addOptions($('.lst-question2 tr.itemQuestion').filter(":visible").length);
+    });
+
+
+    $('#rdQues').click(function (e) {
+        e.preventDefault();
+
+        var arrayLength = parseInt($('#numberRandom').val());
+        //$('#lst-RandQuestions tr.itemQuestion').hide();
+        var n = $('#lst-RandQuestions tr.itemQuestion').length - 1;
+        var randomArray = [];
+
+        while (randomArray.length < arrayLength) {
+            var randomNumber = Math.floor(Math.random() * (n + 1));
+            if (!randomArray.includes(randomNumber)) {
+                randomArray.push(randomNumber);
+            }
+        }
+        console.log(randomArray);
+
+        // Re-assign names of inputs
+        $('#lst-RandQuestions tr.itemQuestion input[type="hidden"]').each(function (index) {
+            if (!randomArray.includes(index)) {
+                $(this).attr('name', 'None');
+            } else {
+                $(this).attr('name', 'lstIDQuestion[' + index + ']');
+            }
+        });
+
+        // submit the form to the server
+        $('#fQuizRandom').submit();
+    });
+</script>
+
+<script>
+    //********* Bank questions box ***********//
+
+    function findChildCategory(lstID) {
+        var findP = false;
+        var addChild = true;
+        var lstChild = [];
+        $('#tree-view option').each(function () {
+            if ($(this).attr('value') == lstID) {
+                findP = true;
+            }
+            else if (findP == true) {
+                rawText = $(this).html();
+                //console.log(rawText.includes("&nbsp;"));
+                if (rawText.includes("&nbsp;") && addChild)
+                    lstChild.push($(this).attr('value'));
+                else
+                    addChild = false
+            }
+        });
+        return lstChild;
+    }
+
+    //$('.lst-question').hide();
+    $('#tree-view').change(function () {
+        //$('.lst-question').show();
+        // Get the selected value
+        var selectedValue = $(this).val();
+        var lstValue = [];
+
+        if ($('#showSubCatagory').is(':checked'))
+            lstValue = findChildCategory(selectedValue);
+
+        lstValue.push(selectedValue);
+
+        // Show/hide table rows based on the selected value
+        $('tr.itemQuestion').each(function () {
+            if (lstValue.some(className => $(this).hasClass(className)) || selectedValue == "-1") {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        });
+    });
+
+    $('#showSubCatagory').change(function () {
+        $('#tree-view').val('-1');
+    });
+
+    $('#masterCbQuestionFormBank').change(function () {
+        if (this.checked) {
+            $('#lst-BankQuestion tr .form-check-input').prop('checked', true);
+        } else {
+            $('#lst-BankQuestion tr .form-check-input').prop('checked', false);
+        }
+    });
+
+    $('#btnAddFromBank').click(function (e) {
+        e.preventDefault();
+
+        var i = 0;
+        $('#lst-BankQuestion tr.itemQuestion').each(function () {
+            var hiddenInput = $(this).find('input[type="hidden"]');
+            var checkboxInput = $(this).find('input[type="checkbox"]');
+            if (checkboxInput.prop('checked') == false) {
+                hiddenInput.remove();
+            }
+            else {
+                hiddenInput.attr('name', 'lstIDQuestion[' + i + ']');
+                i++;
+            }
+        });
+
+        // submit the form to the server
+        $('#fQuizFormBank').submit();
+    });
+
+</script>

@@ -1,0 +1,207 @@
+﻿@model Tuple<List<Question>, clsQuiz>
+
+@{
+    ViewData["Title"] = "Start";
+    Layout = "~/Views/Shared/_LayoutHome.cshtml";
+}
+
+<div class="container-fuild mx-4 px-4 section-type1 title-course">
+    <h1 class="pt-2">Khóa học</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item"><a href="#">Library</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Data</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="container-fuild mx-4 pe-3 question-exam-mode">
+    <div class="row">
+        <div class="col-9 mb-5">
+            <div class="container lst-question">
+
+                <div class="result">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th scope="row" class="col-2">Started on</th>
+                                <td class="col-10">Tuesday, 21 March 2023, 8:33 PM</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">State</th>
+                                <td>Finished</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Completed on</th>
+                                <td colspan="2" id="timeCompleted">Tuesday, 21 March 2023, 8:33 PM</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Time taken </th>
+                                <td colspan="2">1 min 27 secs</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Marks</th>
+                                <td colspan="2">0.00/67.00</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Grade</th>
+                                <td colspan="2">0.00 out of 10.00 (0%)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <div class="row d-flex justify-content-end">
+                    <p class="clock" id="timer">0</p>
+                </div>
+
+                @if (Model.Item2.lstIDQuestion != null && Model.Item2.lstIDQuestion.Count > 0)
+                {
+                    bool shuffle = Model.Item2.Shuffle;
+                    int idQ = 1;
+                    @foreach (var item in Model.Item2.lstIDQuestion)
+                    {
+                        Question itemQ = Model.Item1.Find(obj => obj.ID == item);
+
+                        <div class="row question-item d-flex justify-content-between" id="@itemQ.ID">
+                            <div class="col-2">
+                                <div class="question-item-info">
+                                    <p class="txt-red">Question <span class="hightlight">@idQ</span></p>
+                                    <p>Not yet answered</p>
+                                    <p>Marked out of @itemQ.DefaultMark</p>
+                                    <p><i class="fa-solid fa-flag"></i> Flag question</p>
+                                </div>
+                            </div>
+                            <div class="col-10 question-item-content">
+                                <p>@Html.Raw(@itemQ.Content)</p>
+
+                                <fieldset class="row mb-3 ps-3">
+                                    <div class="col-sm-12">
+                                        @{
+                                            bool multiChoice = false;
+                                            int idChoices = 1;
+                                            var shuffledAnswers = itemQ.Answers;
+                                            if (shuffle)
+                                                shuffledAnswers = itemQ.Answers.OrderBy(_ => new Random().Next()).ToList();
+
+                                            int tmpCountChoice = 0;
+                                            foreach (Answer ans in itemQ.Answers)
+                                            {
+                                                if (ans.weight == 0 || ans.weight == 2)
+                                                    tmpCountChoice++;
+                                            }
+                                            if (tmpCountChoice > 1)
+                                                multiChoice = true;
+
+                                            if (!multiChoice)
+                                            {
+                                                @foreach (Answer ans in shuffledAnswers)
+                                                {
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="Q-@idQ-A-@idChoices">
+                                                        <label class="form-check-label" for="Q-@idQ-A-@idChoices">
+                                                            @Html.Raw(@ans.choice)
+                                                        </label>
+                                                    </div>
+                                                    idChoices++;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                @foreach (Answer ans in shuffledAnswers)
+                                                {
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="Q-@idQ-A-@idChoices">
+                                                        <label class="form-check-label" for="Q-@idQ-A-@idChoices">
+                                                            @Html.Raw(@ans.choice)
+                                                        </label>
+                                                    </div>
+                                                    idChoices++;
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                </fieldset>
+                            </div>
+                            
+                        </div>
+                        idQ++;
+                    }
+
+                }
+            </div>
+        </div>
+        <div class="col-3 right-nav">
+            <div class="nav-title">
+                <p>Quiz navigation</p>
+            </div>
+            <div class="nav-content">
+                <div class="container">
+                    <div class="row lst-shortcut d-flex">
+                        @if (Model.Item2.lstIDQuestion != null && Model.Item2.lstIDQuestion.Count > 0)
+                        {
+                            int idQ = 1;
+                            @foreach (var item in Model.Item2.lstIDQuestion)
+                            {
+                                <div class="shortcut-item">
+                                    <a href="#@item">
+                                        <div class="shortcut-num">
+                                            <p>@idQ</p>
+                                            <div class="doing"></div>
+                                        </div>
+                                    </a>
+                                </div>
+                                idQ++;
+                            }
+
+                        }
+                    </div>
+                </div>
+
+                <a data-bs-toggle="modal" data-bs-target="#cfSubmit">Finish attemp...</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="cfSubmit" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Comfirm finish attemp</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Do you wat finish attemp?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="~/Quiz/Result?IDQuiz=@Model.Item2.ID" class="btn btn-primary">Submit</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.onload = function () {
+        var strTimeLeft = document.getElementById("timer").innerHTML;
+        var timeLeft = 20 * 60 * 1000 - parseInt(strTimeLeft);
+        var countDownDate = new Date().getTime() + timeLeft; // set the countdown to start 20 minutes from now
+        var x = setInterval(function () {
+            var now = new Date().getTime();
+            var distance = countDownDate - now;
+            var hours = Math.floor(distance / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            document.getElementById("timer").innerHTML = "Time left: " + hours + ":" + minutes + ":" + seconds;
+            if (distance < 0) {
+                clearInterval(x);
+                const button = document.querySelector('.submit');
+                button.click();
+            }
+        }, 1000);
+    };
+</script>

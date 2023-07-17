@@ -1,0 +1,70 @@
+﻿@model QuizPlatform.Models.clsQuiz
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutHome.cshtml";
+}
+
+<div class="container-fuild mx-4 px-4 section-type1">
+    <div class="row title-section-2">
+        <div class="col-10">
+            <h2 class="pt-2">@Model.Name</h2>
+        </div>
+        <div class="col-2 d-flex justify-content-end align-items-center setting-panel pt-3">
+            <a href="~/Quiz/Editing?IDQuiz=@Model.ID"><i class="fa-solid fa-gear"></i></a>
+            <i class="fa-solid fa-caret-down" data-bs-toggle="modal" data-bs-target="#startQuiz"></i>
+        </div>
+    </div>
+    <div class="info text-center">
+        <p>Time limit: @Model.timeLimit hour</p>
+        <p>Grade method: Last attempt</p>
+    </div>
+    <div class="row pb-4">
+        <h2>Summary of your last attempt</h2>
+        <table class="table table-striped text-center">
+            <thead>
+                <tr>
+                    <th scope="col" class="col-1">Attempt</th>
+                    <th scope="col" class="col-8 text-start">State</th>
+                    <th scope="col" class="col-2">Grade / 10.00</th>
+                    <th scope="col" class="col-1">Review</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td class="text-start">Mark</td>
+                    <td><a href="">9.00</td>
+                    <td><a href="">Review</a></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="row py-2 mt-4">
+            <div class="col d-flex justify-content-center">
+                <button type="submit" class="btn btn-style-1 btn-primary" data-bs-toggle="modal" data-bs-target="#startQuiz">Preview quiz now</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="startQuiz" tabindex="-1" aria-labelledby="startQuizLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="startQuizLabel">Start attemp</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4>Time limit</h4>
+                <p>Your attempt will have a time limit of 10 mins. When you start, the timer will begin to count down and cannot be paused. You must finish your attempt before it expires. Are you sure you wish to start now?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="~/Quiz/Start?idQuiz=@Model.ID" class="btn btn-primary">Start attemp</a>
+                <a href="~/Quiz/ExportPDF?idQuiz=@Model.ID" class="btn btn-primary">Export</a>
+            </div>
+        </div>
+    </div>
+</div>

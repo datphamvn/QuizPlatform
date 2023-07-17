@@ -1,0 +1,325 @@
+﻿@using QuizPlatform.Utils;
+@model Tuple<List<Category>, List<Question>>
+
+@{
+    ViewData["Title"] = "ManageTab";
+    Layout = "~/Views/Shared/_LayoutHome.cshtml";
+
+    var mess = TempData["mess"] as string;
+}
+
+@{
+    var categories = Model.Item1;
+
+    Func<IEnumerable<Category>, int?, IEnumerable<Category>> getChildren = null;
+    getChildren = (cats, parent) => cats.Where(c => c.ParentCategory == parent).Select(c =>
+    {
+        c.Children = getChildren(cats, c.ID).ToList();
+        return c;
+    });
+    var rootCategories = getChildren(categories, -1).ToList();
+}
+
+<div class="container-fuild mx-4 px-4 section-type1 question-setting">
+    <ul class="nav nav-tabs pt-4" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
+                    type="button" role="tab" aria-controls="home" aria-selected="true">
+                Questions
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
+                    type="button" role="tab" aria-controls="profile" aria-selected="false">
+                Categories
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact"
+                    type="button" role="tab" aria-controls="contact" aria-selected="false">
+                Import
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="export-tab" data-bs-toggle="tab" data-bs-target="#export"
+                    type="button" role="tab" aria-controls="export" aria-selected="false">
+                Export
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active py-4" id="home" role="tabpanel" aria-labelledby="home-tab">
+            <h2>Question bank</h2>
+            <form action="~/question/">
+                <div class="row mb-3">
+                    <label for="inputEmail3" class="col-sm-2 col-form-label">Select a category</label>
+                    <div class="col-sm-3">
+                        <select class="form-select" id="tree-view">
+                            <option value="-1" selected>Default</option>
+                            @foreach (var category in rootCategories)
+                            {
+                                <option value="@category.ID">@category.Name (@Html.Raw(HtmlHelpers.CountQuestionsInCategory(Model.Item2, @category.ID)))</option>
+                                @Html.Raw(HtmlHelpers.RenderChildren(category.Children, Model.Item2, 1))
+                            }
+                        </select>
+                    </div>
+                </div>
+                <p>The default catagory</p>
+
+                <div class="row mb-3">
+                    <div class="col-sm-10">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showSubCatagory">
+                            <label class="form-check-label" for="showSubCatagory">
+                                Also show question for subcatagory
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-10">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="gridCheck1">
+                            <label class="form-check-label" for="gridCheck1">
+                                Also show old question
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-style-1 btn-primary">CREATE A NEW QUESTION ...</button>
+            </form>
+
+            <row class="lst-question">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="col-1">
+                                <input class="form-check-input" type="checkbox"
+                                       id="gridCheck1">
+                            </th>
+                            <th scope="col" class="col-10">
+                                <div class="group-col">
+                                    <p>Question</p>
+                                    <p class="sub">Question name / ID number</p>
+                                </div>
+                            </th>
+                            <th scope="col" class="col-1">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (Question item in Model.Item2)
+                        {
+                            <tr class="@item.CategoryID itemQuestion">
+                                <th scope="row">
+                                    <input class="form-check-input" type="checkbox" id="gridCheck1">
+                                    <i class="fa-solid fa-list"></i>
+                                </th>
+                                <td style="margin-bottom = 0;">@Html.Raw(@item.Content)</td>
+                                <td><a href="~/Question/Edit/?IDQuestion=@item.ID">Edit <i class="fa-solid fa-caret-down"></i></a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </row>
+        </div>
+        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+
+            <div class="subsection ms-4">
+                <div class="title-subsection pb-3">
+                    <i class="fa-solid fa-caret-down"></i> <span>Add category</span>
+                </div>
+                <div class="content-subsection">
+                    <form action="~/Home/SaveCategory" method="POST" id="saveCategory">
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center">
+                                <label for="ParentCategory" class="col-form-label">
+                                    Parent category
+                                </label>
+                                <i class="info fa-sharp fa-solid fa-circle-question"></i>
+                            </div>
+                            <div class="col-sm-4">
+                                <select class="form-select" id="tree-view" name="ParentCategory">
+                                    <option value="-1" selected>Default</option>
+                                    @foreach (var category in rootCategories)
+                                    {
+                                        <option value="@category.ID">@category.Name (@Html.Raw(HtmlHelpers.CountQuestionsInCategory(Model.Item2, @category.ID)))</option>
+                                        @Html.Raw(HtmlHelpers.RenderChildren(category.Children, Model.Item2, 1))
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center">
+                                <label for="Name" class="col-form-label">Name</label>
+                                <i class="fa-solid required fa-circle-exclamation text-end"></i>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" name="Name" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="CategoryInfo" class="col-sm-4 col-form-label">
+                                Category info
+                            </label>
+                            <div class="col-sm-8">
+                                <textarea class="form-control" name="CategoryInfo" rows="8"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center">
+                                <label for="ID" class="col-form-label">ID Number</label>
+                                <i class="info fa-sharp fa-solid fa-circle-question"></i>
+                            </div>
+                            <div class="col-sm-2">
+                                <input type="number" class="form-control" name="ID" required>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="row py-2">
+                            <div class="col offset-sm-4">
+                                <button class="btn btn-style-1 btn-primary btn-red" id="addCategory">
+                                    ADD CATEGORY
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-center">
+                            There are required fields in this form marked <i class="fa-solid required fa-circle-exclamation text-end"></i>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+            <h2>Import questions from file</h2>
+
+            <div class="subsection ms-4">
+                <div class="title-subsection pb-3">
+                    <i class="fa-solid fa-caret-down"></i> <span>File format</span>
+                </div>
+                <div class="content-subsection">
+                    <p>Aiken format</p>
+                </div>
+            </div>
+            <div class="subsection ms-4">
+                <div class="title-subsection pb-3">
+                    <i class="fa-solid fa-caret-down"></i> <span>General</span>
+                </div>
+                <div class="content-subsection">
+                </div>
+            </div>
+            <div class="subsection ms-4">
+                <div class="title-subsection pb-3">
+                    <i class="fa-solid fa-caret-down"></i> <span>Import questions from file</span>
+                </div>
+                <div class="content-subsection">
+                    <form action="~/Home/upload" method="POST" enctype="multipart/form-data">
+                        <div class="row mb-3">
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center">
+                                <label for="file" class="col-form-label">Import</label>
+                                <i class="fa-solid required fa-circle-exclamation text-end"></i>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="file" name="file" id="file" class="form-control" required />
+                            </div>
+                        </div>
+
+                        <div class="row py-2">
+                            <div class="col offset-sm-4">
+                                <button type="submit" class="btn btn-style-1 btn-primary btn-red">
+                                    ADD IMPORT
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-center">
+                            There are required fields in this form marked <i class="fa-solid required fa-circle-exclamation text-end"></i>
+                        </p>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h2 class="modal-title fs-5" id="exampleModalLabel">Import file</h2>
+                @if (mess != null)
+                {
+                    <p class="txt-red" id="statusImort">@mess</p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function findChildCategory(lstID) {
+            var findP = false;
+            var addChild = true;
+            var lstChild = [];
+            $('#tree-view option').each(function () {
+                if ($(this).attr('value') == lstID) {
+                    findP = true;
+                }
+                else if (findP == true) {
+                    rawText = $(this).html();
+                    //console.log(rawText.includes("&nbsp;"));
+                if (rawText.includes("&nbsp;") && addChild)
+                        lstChild.push($(this).attr('value'));
+                    else
+                        addChild = false
+                }
+            });
+            return lstChild;
+        }
+
+    $('.lst-question').hide();
+    $('#tree-view').change(function () {
+        $('.lst-question').show();
+        // Get the selected value
+        var selectedValue = $(this).val();
+        var lstValue = [];
+
+        if ($('#showSubCatagory').is(':checked'))
+            lstValue = findChildCategory(selectedValue);
+        
+        lstValue.push(selectedValue);
+
+        // Show/hide table rows based on the selected value
+        $('tr.itemQuestion').each(function () {
+            if (lstValue.some(className => $(this).hasClass(className)) || selectedValue == "-1") {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        });
+    });
+    $('#showSubCatagory').change(function() {
+        $('#tree-view').val('-1');
+    });
+
+    $('#addCategory').click(function (e) {
+        e.preventDefault();
+        $('#saveCategory').submit();
+    });
+
+
+    if ($('#statusImort').text() != "") {
+        $("#contact-tab").click();
+        $(document).ready(function () {
+            var modal = $('#exampleModal');
+            modal.modal('show');
+        });
+    }
+
+</script>
